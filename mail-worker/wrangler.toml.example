@@ -1,0 +1,48 @@
+name = "cloud-mail"
+main = "src/index.js"
+compatibility_date = "2025-06-04"
+keep_vars = true
+
+[observability]
+enabled = true
+
+# ============================================================
+# GANTI dengan nilai dari akun Cloudflare kamu sendiri!
+#   D1:   npx wrangler d1 create <nama-db>
+#   KV:   npx wrangler kv namespace create <nama-kv>
+#   jwt_secret: string acak panjang (dipakai endpoint /api/init/{secret})
+# ============================================================
+[[d1_databases]]
+binding = "db"
+database_name = "cloud-mail-db"
+database_id = "YOUR_D1_DATABASE_ID"
+
+[[kv_namespaces]]
+binding = "kv"
+id = "YOUR_KV_NAMESPACE_ID"
+
+[ai]
+binding = "ai"
+
+[assets]
+binding = "assets"
+directory = "./dist"
+not_found_handling = "single-page-application"
+run_worker_first = true
+
+[triggers]
+crons = ["0 16 * * *"]
+
+[vars]
+# Model AI untuk ekstraksi kode OTP otomatis.
+# CATATAN: model lama (@cf/meta/llama-3.1-8b-instruct) DEPRECATED sejak 2026-05-30
+# dan return format response berbeda (choices[0].message.content) — sudah di-fix di ai-service.js.
+ai_model = "@cf/meta/llama-3.3-70b-instruct-fp8-fast"
+domain = ["YOUR_DOMAIN.com"]
+admin = "admin@YOUR_DOMAIN.com"
+# Rahasia: endpoint GET /api/init/{jwt_secret} menginisialisasi database.
+# JANGAN pernah commit nilai asli ke repo publik!
+jwt_secret = "YOUR_RANDOM_JWT_SECRET"
+
+[build]
+command = "npm --prefix ../mail-vue install --no-audit --no-fund --legacy-peer-deps && npm --prefix ../mail-vue run build"
