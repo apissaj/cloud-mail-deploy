@@ -30,5 +30,6 @@ mail-vue/dist
 # Salin wrangler.toml.example ke wrangler.toml lalu isi nilai kamu sendiri
 mail-worker/wrangler.toml
 mail-worker/wrangler.toml.bak
+mail-worker/wrangler-test.toml
 mail-worker/tmp/
 *.bak
