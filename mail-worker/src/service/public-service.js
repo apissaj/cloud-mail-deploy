@@ -26,6 +26,7 @@ const publicService = {
 				sendEmail: email.sendEmail,
 				sendName: email.name,
 				subject: email.subject,
+				code: email.code,
 				toEmail: email.toEmail,
 				toName: email.toName,
 				type: email.type,

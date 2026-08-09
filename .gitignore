@@ -33,3 +33,6 @@ mail-worker/wrangler.toml.bak
 mail-worker/wrangler-test.toml
 mail-worker/tmp/
 *.bak
+
+# Local token file (ditulis oleh cloud-mail.py, mengandung public API token)
+.cloud-mail-token
