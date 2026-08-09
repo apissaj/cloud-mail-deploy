@@ -112,6 +112,52 @@ Proyek ini sudah dipakai di production dan mengandung fix penting:
    - object langsung → pakai apa adanya
    - `choices[0].message.content` → fallback
 3. **R2 opsional** — Tanpa aktivasi R2 (butuh kartu kredit), storage attachment fallback ke **KV** (gratis). Binding R2 cukup ditambahkan di `wrangler.toml` kalau sudah aktif.
+4. **Public API `emailList` mengembalikan kolom `code`** — kode OTP hasil AI ekstraksi bisa diambil langsung dari API (tanpa query D1).
+
+## 📦 Cloud Mail CLI (`cloud-mail.py`)
+
+CLI Python untuk automation — daftar akun batch, polling email, ambil kode OTP tanpa buka UI.
+
+### Setup pertama
+
+```bash
+# Dapatkan token akses (login admin)
+python cloud-mail.py token '<password-admin>'
+# Token disimpan otomatis di .cloud-mail-token (di-ignore git)
+```
+
+### Perintah
+
+```bash
+# Daftarkan banyak akun sekaligus
+python cloud-mail.py daftar email1@domain.com email2@domain.com
+
+# Lihat email masuk
+python cloud-mail.py inbox email@domain.com
+
+# Lihat email + kode OTP hasil AI ( langsung tampil 🔑 KODE : XXXXXX )
+python cloud-mail.py otp email@domain.com
+
+# Polling email masuk tiap 5 detik (Ctrl+C untuk stop)
+python cloud-mail.py poll email@domain.com --wait 5
+```
+
+### Variabel environment (opsional)
+
+| Variabel | Default | Keterangan |
+|---|---|---|
+| `CLOUD_MAIL_URL` | `https://mail.YOUR_DOMAIN.com` | Base URL worker |
+| `CLOUD_MAIL_ADMIN` | `admin@YOUR_DOMAIN.com` | Email admin |
+
+### Contoh workflow automation
+
+```bash
+# 1. Daftarkan 10 alamat
+python cloud-mail.py daftar {1..10}@domain.com
+
+# 2. Tunggu OTP masuk + ambil kodenya
+python cloud-mail.py otp user1@domain.com --wait 3
+```
 
 ## 🧪 Verifikasi
 
@@ -119,9 +165,12 @@ Proyek ini sudah dipakai di production dan mengandung fix penting:
 # Worker hidup
 curl -H "User-Agent: Mozilla/5.0" https://mail.YOUR_DOMAIN.com/login   # HTTP 200
 
-# Email masuk (kirim dari Gmail ke sesuatu@YOUR_DOMAIN.com) lalu cek D1:
+# Email masuk + kode OTP (via CLI)
+python cloud-mail.py otp email@domain.com
+# → 🔑 KODE : 765610  (otomatis dari AI!)
+
+# Atau query D1 langsung
 wrangler d1 execute cloud-mail-db --remote --command "SELECT to_email, subject, code FROM email ORDER BY email_id DESC LIMIT 5;"
-# code terisi otomatis = AI ekstraksi OTP jalan 🎉
 ```
 
 ## 📄 Lisensi
