@@ -36,3 +36,5 @@ mail-worker/tmp/
 
 # Local token file (ditulis oleh cloud-mail.py, mengandung public API token)
 .cloud-mail-token
+__pycache__/
+*.pyc
