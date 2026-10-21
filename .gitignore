@@ -38,3 +38,8 @@ mail-worker/tmp/
 .cloud-mail-token
 __pycache__/
 *.pyc
+
+# Temporary local files (debug/testing artifacts)
+mail-worker/ids.json
+mail-worker/*.txt
+mail-worker/[0-9]*
