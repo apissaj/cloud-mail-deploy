@@ -379,8 +379,13 @@ function formatName(email) {
     width: 34px;
     height: 34px;
     border-radius: 50%;
-    color: #ffffff;
-    background: linear-gradient(135deg, #1890ff, #3a80dd);
+    color: var(--sg-solid-fg);
+    /* Solid Glass: pane solid dengan finish di tepi, bukan gradien. */
+    background: var(--sg-solid);
+    box-shadow:
+      inset 0 1px 0 var(--sg-solid-rim),
+      inset 0 -1px 0 var(--sg-solid-under),
+      0 0 0 1px var(--sg-solid-edge);
     transition: all 0.3s ease;
     display: flex;
     align-items: center;

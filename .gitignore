@@ -43,3 +43,9 @@ __pycache__/
 mail-worker/ids.json
 mail-worker/*.txt
 mail-worker/[0-9]*
+
+# Serena (MCP) project cache — indeks LSP lokal, bukan kode
+.serena/
+
+# Playwright MCP — screenshot & snapshot hasil pengujian lokal
+.playwright-mcp/

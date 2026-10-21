@@ -5,7 +5,7 @@
         <Icon icon="mdi:email-outline" width="24" height="24" />
         <div>{{settingStore.settings.title}}</div>
       </div>
-      <el-menu :collapse="false" text-color="#fff" active-text-color="#fff" style="margin-top: 10px">
+      <el-menu :collapse="false" style="margin-top: 10px">
         <el-menu-item @click="router.push({name: 'email'})" index="email"
                       :class="route.meta.name === 'email' ? 'choose-item' : ''">
           <Icon icon="hugeicons:mailbox-01" width="20" height="20" />
@@ -93,8 +93,16 @@ const route = useRoute();
   align-items: center;
   justify-content: center;
   gap: 5px;
-  color: #ffffff;
-  background: linear-gradient(135deg, #1890ff, #3a80dd);
+  color: var(--sg-solid-fg);
+  /* Solid Glass: pane solid, bukan gradien. Cahaya di tepi atas, bayangan di
+     tepi bawah, hairline melingkar — "the finish is at the edge". */
+  background: var(--sg-solid);
+  box-shadow:
+    inset 0 1px 0 var(--sg-solid-rim),
+    inset 0 -1px 0 var(--sg-solid-under),
+    inset 0 0 0 1px var(--sg-solid-inner),
+    0 0 0 1px var(--sg-solid-edge),
+    0 2px 6px -2px var(--sg-solid-under);
   transition: all 0.3s ease;
   max-width: 240px;
   padding: 0 10px;
@@ -115,7 +123,7 @@ const route = useRoute();
     position: absolute;
     font-size: 12px;
     right: 8px;
-    color: #ffffff;
+    color: inherit;
   }
 
 }
@@ -124,7 +132,7 @@ const route = useRoute();
 .manage-title {
   margin-top: 10px;
   padding-left: 20px;
-  color: #fff;
+  color: var(--el-text-color-secondary);
 }
 
 .el-menu-item {
@@ -134,15 +142,20 @@ const route = useRoute();
   padding: 10px !important;
 }
 
+/* "One state": terpilih, hover, dan terbuka memakai kaca yang sama. */
 .choose-item {
   font-weight: bold;
-  background: rgba(255, 255, 255, 0.08) !important;
-  backdrop-filter: blur(4px);
+  background: var(--glass-state) !important;
+  box-shadow:
+    inset 0 1px 0 var(--glass-state-rim),
+    0 0 0 1px var(--glass-state-edge);
+  backdrop-filter: var(--glass-blur-control);
+  -webkit-backdrop-filter: var(--glass-blur-control);
 }
 
 @media (hover: hover) {
   .el-menu-item:hover {
-    background: rgba(255, 255, 255, 0.08) !important;
+    background: var(--glass-state) !important;
   }
 }
 
@@ -169,8 +182,8 @@ const route = useRoute();
 }
 
 :deep(.el-divider__text) {
-  background: var(--aside-backgound);
-  color: #FFFFFF;
+  background: var(--sg-aside-background);
+  color: var(--el-text-color-secondary);
 }
 
 .scroll {

@@ -1,0 +1,470 @@
+/*
+ * solid-glass-ep.css — Adapter Solid Glass → Element Plus
+ * ---------------------------------------------------------------------------
+ * Memetakan material Solid Glass (upstream: github.com/deeplethe/solid-glass,
+ * MIT, commit 6e8903e4) ke variabel CSS Element Plus (--el-*), lalu
+ * menambahkan kelas .glass-* untuk permukaan besar.
+ *
+ * Tidak ada komponen Vue yang diubah: Element Plus sepenuhnya digerakkan
+ * variabel, jadi cukup menimpa variabelnya di sini.
+ *
+ * CATATAN SPESIFISITAS (penting!):
+ *   element-plus/theme-chalk/dark/css-vars.css memakai selektor `html.dark`
+ *   (spesifisitas 0,1,1). Karena itu blok dark di sini WAJIB memakai
+ *   `html.dark` juga — kalau memakai `.dark` (0,1,0) akan kalah dan material
+ *   tidak terpakai di mode gelap.
+ *
+ * Urutan impor di main.js (WAJIB):
+ *   './style.css'
+ *   'element-plus/theme-chalk/dark/css-vars.css'
+ *   './theme/solid-glass-ep.css'   ← paling akhir
+ */
+
+/* ===========================================================================
+ * 1. MATERIAL TOKENS + LIGHT
+ * ===========================================================================
+ * Token --glass-* disalin apa adanya dari solid-glass.css upstream (bagian
+ * :root), supaya kelas .glass-* di bawah memakai bahasa material yang sama
+ * tanpa perlu mengimpor Tailwind at-rules milik upstream.
+ */
+
+:root {
+  /* Bentuk */
+  --radius: 0.875rem;
+  --radius-control: 0.7rem;
+
+  /* Tiga ketebalan kaca: panel < card < popover (makin tebal makin opak). */
+  --sg-panel: oklch(0.975 0.004 265 / 44%);
+  --sg-card: oklch(0.98 0.004 265 / 60%);
+  --sg-popover: oklch(0.985 0.003 265 / 96%);
+
+  /* Finish di tepi: rim (cahaya tepi atas), inner (garis dalam),
+     edge (hairline luar), shade (bayangan bawah), contact (bayangan kontak). */
+  --glass-rim: oklch(1 0 0 / 90%);
+  --glass-inner: oklch(1 0 0 / 35%);
+  --glass-edge: oklch(0.38 0.03 265 / 10%);
+  --popover-edge: oklch(0.38 0.03 265 / 22%);
+  --popover-under: oklch(0.38 0.03 265 / 16%);
+  --glass-shade: oklch(0.3 0.06 265 / 28%);
+  --glass-contact: oklch(0.25 0.03 265 / 6%);
+  --glass-lift: oklch(0.25 0.03 265 / 14%);
+
+  /* Kaca bening untuk kontrol kecil, dan "satu state" (hover/terpilih/terbuka). */
+  --glass-control: oklch(1 0 0 / 55%);
+  --glass-state: oklch(0.3 0.02 265 / 9%);
+  --glass-state-edge: oklch(0.3 0.02 265 / 13%);
+
+  /* Field: kaca bening untuk mengetik. */
+  --field: oklch(1 0 0 / 60%);
+  --field-rim: oklch(1 0 0);
+  --field-edge: oklch(0.3 0.02 265 / 14%);
+
+  /* Groove track (switch/slider) dan knob (thumb). */
+  --well-shade: oklch(0.3 0.06 265 / 14%);
+  --well-rim: oklch(1 0 0 / 85%);
+  --knob: oklch(1 0 0);
+  --knob-shade: oklch(0.3 0.06 265 / 30%);
+  --focus-line: oklch(0.2 0 0 / 50%);
+
+  /* Blur: light memakai saturate, dark tidak (blur netral). */
+  --glass-blur: blur(26px) saturate(180%);
+  --glass-blur-control: blur(14px);
+
+  /* Brand Solid Glass: hijau. Dipakai untuk --el-color-primary*. */
+  --sg-brand: oklch(0.68 0.13 165);
+  --sg-brand-fg: oklch(0.99 0 0);
+
+  /* Chart: abu-abu netral, tanpa hue. */
+  --chart-1: oklch(0.7 0 0);
+  --chart-2: oklch(0.54 0 0);
+  --chart-3: oklch(0.44 0 0);
+  --chart-4: oklch(0.35 0 0);
+  --chart-5: oklch(0.27 0 0);
+
+  /* Cahaya ambient di bawah kaca (light saja). */
+  --light-1: oklch(0.68 0.13 165 / 7%);
+  --light-2: oklch(0.75 0.08 240 / 11%);
+  --light-3: oklch(0.68 0.13 165 / 4%);
+}
+
+/* Permukaan halaman & teks (light) */
+:root {
+  --sg-background: oklch(0.925 0.007 265);
+  --sg-foreground: oklch(0.16 0 0);
+  --sg-muted-foreground: oklch(0.47 0 0);
+
+  /* --- Pemetaan ke Element Plus --- */
+  --el-bg-color-page: var(--sg-background);
+  --el-bg-color: var(--sg-card);
+  --el-bg-color-overlay: var(--sg-popover);
+  --el-fill-color-blank: var(--sg-background);
+
+  --el-text-color-primary: var(--sg-foreground);
+  --el-text-color-regular: oklch(0.3 0 0);
+  --el-text-color-secondary: var(--sg-muted-foreground);
+  --el-text-color-placeholder: oklch(0.6 0 0);
+
+  --el-border-color: oklch(0.3 0.02 265 / 13%);
+  --el-border-color-light: oklch(0.3 0.02 265 / 10%);
+  --el-border-color-lighter: oklch(0.3 0.02 265 / 7%);
+  --el-border-color-extra-light: oklch(0.3 0.02 265 / 5%);
+
+  --el-fill-color: oklch(0.3 0.02 265 / 9%);
+  --el-fill-color-light: oklch(0.3 0.02 265 / 7%);
+  --el-fill-color-lighter: oklch(0.3 0.02 265 / 5%);
+
+  /* Brand */
+  --el-color-primary: var(--sg-brand);
+  --el-color-primary-light-3: oklch(0.76 0.1 165);
+  --el-color-primary-light-5: oklch(0.82 0.07 165);
+  --el-color-primary-light-7: oklch(0.88 0.05 165);
+  --el-color-primary-light-8: oklch(0.91 0.04 165);
+  --el-color-primary-light-9: oklch(0.94 0.03 165);
+  --el-color-primary-dark-2: oklch(0.58 0.14 165);
+
+  /* Geometri material */
+  --el-border-radius-base: var(--radius-control);
+  --el-border-radius-small: 0.45rem;
+  --el-border-radius-round: 9999px;
+
+  /* Data halaman, dipakai .glass-* */
+  --sg-aside-background: oklch(0.975 0.004 265 / 44%);
+  --sg-hover: oklch(0.3 0.02 265 / 10%);
+
+  /* Aside (sidebar) & header — panel kaca, bukan biru tua. */
+  --aside-backgound: var(--sg-aside-background);
+  --base-fill: var(--el-fill-color);
+  --extra-light-fill: var(--el-fill-color-lighter);
+  --light-ill: var(--el-fill-color-light);
+  --light-border: var(--el-border-color);
+  --light-border-color: var(--el-border-color-light);
+  --base-border-color: var(--el-border-color);
+  --regular-text-color: var(--el-text-color-regular);
+  --secondary-text-color: var(--el-text-color-secondary);
+  --form-desc-color: var(--el-text-color-secondary);
+  --login-switch-color: var(--el-color-primary);
+  --scrollbar-track-color: var(--el-border-color);
+  --email-scroll-content-color: oklch(0.3 0 0 / 40%);
+  --email-hover-background: var(--glass-state);
+  --choose-account-background: var(--el-fill-color);
+  --login-border: 1px solid var(--el-border-color-lighter);
+  --message-block-color: transparent;
+  --loadding-background: oklch(1 0 0 / 80%);
+  --header-actions-border: inset 0 -1px 0 0 var(--el-border-color-lighter);
+  --aside-right-border: 3px 0 5px oklch(0.3 0.06 265 / 35%);
+}
+
+/* Pane solid: "primary" Solid Glass bukan warna, tapi kunci yang solid —
+  还是没有一个色相的品牌色。Primary brand (hijau) dipakai untuk aksen. */
+:root {
+  --sg-solid: oklch(0.2 0 0);
+  --sg-solid-fg: oklch(0.985 0 0);
+  --sg-solid-rim: oklch(1 0 0 / 30%);
+  --sg-solid-under: oklch(0 0 0 / 45%);
+  --sg-solid-edge: oklch(0.2 0 0 / 30%);
+  --sg-solid-inner: oklch(1 0 0 / 7%);
+}
+
+/* ===========================================================================
+ * 2. DARK — WAJIB `html.dark` (lihat catatan spesifisitas di atas)
+ * ===========================================================================
+ */
+
+html.dark {
+  --sg-background: oklch(0.16 0 0);
+  --sg-foreground: oklch(0.985 0 0);
+  --sg-muted-foreground: oklch(0.72 0 0);
+
+  --sg-panel: oklch(1 0 0 / 4.5%);
+  --sg-card: oklch(0.31 0 0 / 46%);
+  --sg-popover: oklch(0.22 0 0 / 96%);
+
+  --glass-rim: oklch(1 0 0 / 16%);
+  --glass-inner: oklch(1 0 0 / 4%);
+  --glass-edge: oklch(1 0 0 / 6%);
+  --popover-edge: var(--glass-edge);
+  --popover-under: oklch(0 0 0 / 0%);
+  --glass-shade: oklch(0 0 0 / 60%);
+  --glass-contact: oklch(0 0 0 / 10%);
+  --glass-lift: oklch(0 0 0 / 22%);
+
+  --glass-control: oklch(1 0 0 / 7%);
+  --glass-state: var(--glass-control);
+  --glass-state-edge: var(--glass-edge);
+
+  --field: oklch(1 0 0 / 6%);
+  --field-rim: oklch(1 0 0 / 15%);
+  --field-edge: oklch(1 0 0 / 8%);
+
+  --well-shade: oklch(0 0 0 / 38%);
+  --well-rim: oklch(1 0 0 / 9%);
+  --knob: oklch(0.97 0 0);
+  --knob-shade: oklch(0 0 0 / 55%);
+  --focus-line: oklch(1 0 0 / 40%);
+
+  --glass-blur: blur(26px);
+  --glass-blur-control: blur(14px);
+
+  --sg-brand: oklch(0.78 0.13 166);
+  --sg-brand-fg: oklch(0.2 0.03 166);
+
+  --chart-1: oklch(0.94 0 0);
+  --chart-2: oklch(0.83 0 0);
+  --chart-3: oklch(0.69 0 0);
+  --chart-4: oklch(0.56 0 0);
+  --chart-5: oklch(0.44 0 0);
+
+  --light-1: transparent;
+  --light-2: transparent;
+  --light-3: transparent;
+
+  --sg-hover: oklch(1 0 0 / 8%);
+  --sg-aside-background: oklch(0.11 0 0 / 50%);
+
+  --aside-backgound: var(--sg-aside-background);
+  --base-fill: var(--el-fill-color);
+  --extra-light-fill: var(--el-fill-color-lighter);
+  --light-ill: var(--el-fill-color-light);
+  --light-border: var(--el-border-color);
+  --light-border-color: var(--el-border-color-light);
+  --base-border-color: var(--el-border-color);
+  --regular-text-color: var(--el-text-color-regular);
+  --secondary-text-color: var(--el-text-color-secondary);
+  --form-desc-color: var(--el-text-color-secondary);
+  --login-switch-color: var(--el-color-primary);
+  --scrollbar-track-color: var(--el-border-color);
+  --email-scroll-content-color: oklch(1 0 0 / 30%);
+  --email-hover-background: var(--glass-state);
+  --choose-account-background: var(--el-fill-color);
+  --login-border: 1px solid var(--el-border-color-lighter);
+  --message-block-color: oklch(0.18 0 0 / 20%);
+  --loadding-background: oklch(0 0 0 / 30%);
+  --header-actions-border: inset 0 -1px 0 0 var(--el-border-color-lighter);
+  --aside-right-border: 3px 0 5px oklch(0 0 0 / 60%);
+
+  --sg-solid: oklch(0.94 0 0);
+  --sg-solid-fg: oklch(0.18 0 0);
+  --sg-solid-rim: oklch(1 0 0);
+  --sg-solid-under: oklch(0 0 0 / 22%);
+  --sg-solid-edge: oklch(1 0 0 / 26%);
+  --sg-solid-inner: oklch(0 0 0 / 7%);
+}
+
+  /* --- Pemetaan ke Element Plus --- */
+  --el-bg-color-page: var(--sg-background);
+  --el-bg-color: var(--sg-card);
+  --el-bg-color-overlay: var(--sg-popover);
+  --el-fill-color-blank: var(--sg-background);
+
+  --el-text-color-primary: var(--sg-foreground);
+  --el-text-color-regular: oklch(0.85 0 0);
+  --el-text-color-secondary: var(--sg-muted-foreground);
+  --el-text-color-placeholder: oklch(0.55 0 0);
+
+  --el-border-color: oklch(1 0 0 / 11%);
+  --el-border-color-light: oklch(1 0 0 / 9%);
+  --el-border-color-lighter: oklch(1 0 0 / 7%);
+  --el-border-color-extra-light: oklch(1 0 0 / 5%);
+
+  --el-fill-color: oklch(1 0 0 / 8%);
+  --el-fill-color-light: oklch(1 0 0 / 7%);
+  --el-fill-color-lighter: oklch(1 0 0 / 5%);
+
+  --el-color-primary: var(--sg-brand);
+  --el-color-primary-light-3: oklch(0.72 0.11 166);
+  --el-color-primary-light-5: oklch(0.62 0.1 166);
+  --el-color-primary-light-7: oklch(0.48 0.08 166);
+  --el-color-primary-light-8: oklch(0.4 0.07 166);
+  --el-color-primary-light-9: oklch(0.32 0.05 166);
+  --el-color-primary-dark-2: oklch(0.86 0.12 166);
+}
+
+/* ===========================================================================
+ * 3. LANDASAN & LATAR HALAMAN
+ * ===========================================================================
+ */
+
+body {
+  background-color: var(--sg-background);
+  color: var(--sg-foreground);
+  /* Tiga sumber cahaya samar di bawah kaca; dark = transparan semua. */
+  background-image:
+    radial-gradient(62rem 42rem at 12% -6rem, var(--light-1), transparent 62%),
+    radial-gradient(52rem 38rem at 92% 4rem, var(--light-2), transparent 60%),
+    radial-gradient(64rem 46rem at 55% 110%, var(--light-3), transparent 62%);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+/* ===========================================================================
+ * 4. KELAS KACA — material untuk permukaan besar
+ * ===========================================================================
+ * Empat aturan Solid Glass: finish di tepi, berat, kedalaman = ketebalan,
+ * satu state. Tepi kaca tidak digambar dengan `border` (border + hairline
+ * tampak sebagai dua cincin), jadi border di-nol-kan dan garisnya dibuat
+ * lewat box-shadow inset.
+ */
+
+/* Tepi konvensi ringkas */
+.glass-panel,
+.glass-card,
+.glass-popover {
+  border-width: 0;
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+
+/* panel: paling tipis (kolom, header, aside) */
+.glass-panel {
+  background-color: var(--sg-panel);
+  box-shadow:
+    inset 0 1px 0 var(--glass-rim),
+    inset 0 0 0 1px var(--glass-inner),
+    0 0 0 1px var(--glass-edge),
+    0 1px 2px var(--glass-contact),
+    0 12px 32px -14px var(--glass-shade);
+}
+
+/* card: tebal sedang (kartu isi) */
+.glass-card {
+  background-color: var(--sg-card);
+  box-shadow:
+    inset 0 1px 0 var(--glass-rim),
+    inset 0 0 0 1px var(--glass-inner),
+    0 0 0 1px var(--glass-edge),
+    0 1px 2px var(--glass-contact),
+    0 12px 32px -14px var(--glass-shade);
+}
+
+/* popover: paling tebal (menu, dropdown, dialog) */
+.glass-popover {
+  background-color: var(--sg-popover);
+  box-shadow:
+    inset 0 1px 0 var(--glass-rim),
+    inset 0 -1px 0 var(--popover-under),
+    0 0 0 1px var(--popover-edge),
+    0 24px 60px -18px var(--glass-shade),
+    0 6px 16px -6px var(--glass-lift);
+}
+
+/* kontrol kecil dari kaca bening (tombol glass, bubble) */
+.glass-control {
+  -webkit-backdrop-filter: var(--glass-blur-control);
+  backdrop-filter: var(--glass-blur-control);
+  box-shadow:
+    inset 0 1px 0 var(--glass-rim),
+    0 0 0 1px var(--glass-edge),
+    0 1px 2px var(--glass-contact);
+}
+
+/* Satu state: hover, terpilih, dan terbuka memakai kaca yang sama. */
+.glass-state,
+.el-menu-item:hover,
+.el-dropdown-menu__item:not(.is-disabled):hover,
+.el-select-dropdown__item:not(.is-disabled):hover {
+  background-color: var(--glass-state) !important;
+}
+
+/* ===========================================================================
+ * 5. JEMBATAN KE PERMUKAAN ELEMENT PLUS
+ * ===========================================================================
+ * Memberi material ke komponen EP yang paling terlihat. Selector EP ini
+ * stabil (kelas publik EP), bukan internal yang rapuh.
+ */
+
+/* Dialog: pane paling tebal; isi opak agar mudah dibaca. */
+.el-dialog {
+  --el-dialog-bg-color: var(--sg-popover);
+  --el-dialog-box-shadow:
+    inset 0 1px 0 var(--glass-rim),
+    inset 0 -1px 0 var(--popover-under),
+    0 0 0 1px var(--popover-edge),
+    0 24px 60px -18px var(--glass-shade),
+    0 6px 16px -6px var(--glass-lift);
+  --el-dialog-border-radius: var(--radius);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+}
+
+/* Kartu */
+.el-card {
+  --el-card-bg-color: var(--sg-card);
+  --el-card-border-color: transparent;
+  --el-card-border-radius: var(--radius);
+}
+
+/* Menu (aside) */
+.el-menu {
+  --el-menu-bg-color: transparent;
+  --el-menu-hover-bg-color: var(--glass-state);
+  --el-menu-text-color: var(--el-text-color-regular);
+  --el-menu-active-color: var(--el-color-primary);
+  --el-menu-border-color: transparent;
+}
+
+/* Tabel: header muted, baris hover kaca. */
+.el-table {
+  --el-table-bg-color: transparent;
+  --el-table-tr-bg-color: transparent;
+  --el-table-header-bg-color: var(--el-fill-color-lighter);
+  --el-table-header-text-color: var(--sg-muted-foreground);
+  --el-table-text-color: var(--el-text-color-regular);
+  --el-table-border-color: var(--el-border-color-lighter);
+  --el-table-row-hover-bg-color: var(--glass-state);
+}
+
+/* Dropdown & select: pane kaca paling tebal. */
+.el-dropdown__popper,
+.el-select__popper,
+.el-popper.is-light {
+  --el-bg-color-overlay: var(--sg-popover);
+  --el-border-color-light: var(--popover-edge);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow:
+    inset 0 1px 0 var(--glass-rim),
+    0 0 0 1px var(--popover-edge),
+    0 24px 60px -18px var(--glass-shade),
+    0 6px 16px -6px var(--glass-lift);
+}
+
+/* Field: kaca bening untuk mengetik. */
+.el-input__wrapper,
+.el-textarea__inner,
+.el-select__wrapper {
+  background-color: var(--field);
+  box-shadow: inset 0 1px 0 var(--field-rim), 0 0 0 1px var(--field-edge);
+  border-radius: var(--radius-control);
+}
+
+.el-input__wrapper.is-focus,
+.el-textarea__inner:focus,
+.el-select__wrapper.is-focused {
+  box-shadow: inset 0 1px 0 var(--field-rim), 0 0 0 1.5px var(--focus-line);
+}
+
+/* ===========================================================================
+ * 6. FALLBACK — tanpa dukungan backdrop-filter, pakai warna lebih opak.
+ * ===========================================================================
+ */
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass-panel {
+    background-color: oklch(0.97 0.004 265);
+  }
+  .glass-card {
+    background-color: oklch(0.98 0.004 265);
+  }
+  .glass-popover {
+    background-color: oklch(0.985 0.003 265);
+  }
+  html.dark .glass-panel {
+    background-color: oklch(0.2 0 0);
+  }
+  html.dark .glass-card {
+    background-color: oklch(0.24 0 0);
+  }
+  html.dark .glass-popover {
+    background-color: oklch(0.22 0 0);
+  }
+}
