@@ -292,6 +292,101 @@ function getEmailList(emailId, size) {
   return allEmailList({emailId, size, ...params})
 }
 
+const NOTIFY_SOUND = '/sounds/otp-notification.mp3';
+
+let _actx = null;
+let _otpBuf = null;
+let _pendingBeep = null;
+
+function _ensureCtx() {
+  if (!_actx) {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    _actx = new AC();
+  }
+  return _actx;
+}
+
+function _flushPending() {
+  if (_pendingBeep) {
+    const fn = _pendingBeep;
+    _pendingBeep = null;
+    fn();
+  }
+}
+
+// Browser autoplay policy: sound only plays after at least one user gesture
+// (click/tap/key). This unlocks a shared AudioContext on first interaction and
+// flushes any beep that arrived while locked.
+function unlockAudio() {
+  const ctx = _ensureCtx();
+  if (ctx && ctx.state === 'suspended') {
+    ctx.resume().then(_flushPending).catch(() => {});
+  } else {
+    _flushPending();
+  }
+  document.removeEventListener('pointerdown', unlockAudio);
+  document.removeEventListener('touchstart', unlockAudio);
+  document.removeEventListener('keydown', unlockAudio);
+}
+document.addEventListener('pointerdown', unlockAudio, { once: true });
+document.addEventListener('touchstart', unlockAudio, { once: true });
+document.addEventListener('keydown', unlockAudio, { once: true });
+
+async function beep() {
+  try {
+    const ctx = _ensureCtx();
+    if (!ctx) return;
+    if (ctx.state !== 'running') {
+      _pendingBeep = beep;
+      return;
+    }
+    if (!_otpBuf) {
+      const res = await fetch(NOTIFY_SOUND);
+      if (!res.ok) throw new Error('sound fetch failed');
+      const ab = await res.arrayBuffer();
+      _otpBuf = await ctx.decodeAudioData(ab);
+    }
+    const src = ctx.createBufferSource();
+    src.buffer = _otpBuf;
+    const gain = ctx.createGain();
+    gain.gain.value = 0.7;
+    src.connect(gain);
+    gain.connect(ctx.destination);
+    src.start();
+  } catch (e) {
+    // fallback: oscillator beep
+    try {
+      const ctx2 = _ensureCtx();
+      if (!ctx2) return;
+      if (ctx2.state !== 'running') {
+        _pendingBeep = beep;
+        return;
+      }
+      const osc = ctx2.createOscillator();
+      const gain = ctx2.createGain();
+      osc.connect(gain);
+      gain.connect(ctx2.destination);
+      osc.frequency.value = 880;
+      gain.gain.value = 0.15;
+      osc.start();
+      setTimeout(() => { osc.stop(); }, 350);
+    } catch (e2) { /* silent */ }
+  }
+}
+
+function notifyNewMail(email) {
+  beep();
+  const title = email.code ? `OTP ${email.code}` : (email.name || email.subject || 'New Email');
+  ElNotification({
+    title,
+    message: `${email.subject || ''} — ${email.toEmail || email.sendEmail || ''}`,
+    type: 'success',
+    position: 'bottom-right',
+    duration: 8000,
+  });
+}
+
 async function latest() {
 
   while (true) {
@@ -302,11 +397,9 @@ async function latest() {
 
     const latestId = sysEmailScroll.value.latestEmail?.emailId
 
+    // Poll whenever auto-refresh is enabled (>=2s). The old guard `autoRefresh < 2`
+    // meant a default of 0 silently disabled polling -> required manual refresh.
     if (autoRefresh < 2) {
-      continue
-    }
-
-    if (!latestId && latestId !== 0) {
       continue
     }
 
@@ -314,21 +407,16 @@ async function latest() {
       continue
     }
 
-
-    if (params.type !== 'receive') {
-      continue
-    }
-
     try {
+
+      if (latestId === undefined || latestId === null) {
+        continue
+      }
 
       const curTimeSort = params.timeSort
       let list = await allEmailLatest(latestId)
 
       if (list.length === 0) {
-        continue
-      }
-
-      if (params.type !== 'receive') {
         continue
       }
 
@@ -340,6 +428,7 @@ async function latest() {
       for (let email of list) {
 
         sysEmailScroll.value.addItem(email)
+        notifyNewMail(email)
         await sleep(50)
 
       }
